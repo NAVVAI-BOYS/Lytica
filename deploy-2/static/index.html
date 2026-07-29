@@ -99,17 +99,17 @@ ul.b li{margin:.42em 0}
 .hgrid{display:grid;grid-template-columns:1.02fr .92fr;grid-template-rows:auto auto;
   gap:24px 30px;padding:40px 20px 26px;align-items:start}
 .herotext{grid-column:1;grid-row:1;position:relative;padding-left:22px}
-.netstage{grid-column:2;grid-row:1 / span 2}
+.netstage{grid-column:2;grid-row:1 / span 2;align-self:center}
 .routes{grid-column:1;grid-row:2}
 @media(max-width:900px){
   .hgrid{grid-template-columns:1fr;gap:18px;padding:26px 20px 20px}
   .herotext,.netstage,.routes{grid-column:1;grid-row:auto}
   .herotext{order:1}.routes{order:2}.netstage{order:3;height:230px}
 }
-.netstage{position:relative;height:100%;min-height:330px;border:1px solid rgba(255,255,255,.15);
+.netstage{position:relative;height:430px;border:1px solid rgba(255,255,255,.15);
   border-radius:12px;overflow:hidden;
   background:radial-gradient(120% 100% at 70% 50%,rgba(63,113,124,.16),rgba(255,255,255,.02))}
-@media(max-width:900px){.netstage{min-height:0;height:230px}}
+@media(max-width:900px){.netstage{height:240px}}
 .netstage .lbl{position:absolute;left:12px;top:11px;z-index:2;font-size:10px;letter-spacing:.15em;
   text-transform:uppercase;font-weight:800;color:#FB9D46;background:rgba(4,16,24,.6);
   border:1px solid rgba(251,157,70,.4);border-radius:99px;padding:4px 10px}
@@ -609,14 +609,16 @@ function labId(id){ return lab(qById(id), ANS[id]); }
   }
   function build(){
     nodes=[];
-    hub={x:W*0.72,y:H*0.5};
+    hub={x:W*0.5,y:H*0.5};
     var n=W<420?7:9;
+    /* an even ring, only lightly varied, so the network fills the panel
+       instead of clustering in one corner of it */
     for(var i=0;i<n;i++){
-      var a=(i/n)*Math.PI*2;
-      var rx=W*0.30, ry=H*0.36;
+      var a=(i/n)*Math.PI*2 - Math.PI/2;
+      var rx=W*0.37, ry=H*0.36, jitter=0.82+0.18*(((i*37)%10)/10);
       nodes.push({
-        bx:hub.x+Math.cos(a)*rx*(0.55+0.45*((i*37)%10)/10),
-        by:hub.y+Math.sin(a)*ry*(0.55+0.45*((i*53)%10)/10),
+        bx:hub.x+Math.cos(a)*rx*jitter,
+        by:hub.y+Math.sin(a)*ry*jitter,
         ph:Math.random()*6.28, sp:0.25+Math.random()*0.4,
         alt: i%3!==2, x:0,y:0
       });
@@ -651,14 +653,14 @@ function labId(id){ return lab(qById(id), ANS[id]); }
       var nd=nodes[i];
       var down = (i===failIdx && phase==='down');
       var frac = down ? (nd.alt?1:0.55) : 1;
-      var col = down ? (nd.alt?'rgba(251,157,70,.95)':'rgba(192,57,43,.9)') : 'rgba(165,205,220,.5)';
+      var col = down ? (nd.alt?'rgba(251,157,70,.95)':'rgba(192,57,43,.9)') : 'rgba(170,210,225,.58)';
       ctx.beginPath();
       ctx.moveTo(nd.x,nd.y);
       var mx=(nd.x+hub.x)/2, my=(nd.y+hub.y)/2-24;
       var ex=nd.x+(hub.x-nd.x)*frac, ey=nd.y+(hub.y-nd.y)*frac;
       if(frac>=1){ ctx.quadraticCurveTo(mx,my,hub.x,hub.y); }
       else { ctx.quadraticCurveTo((nd.x+ex)/2,(nd.y+ey)/2-12,ex,ey); }
-      ctx.strokeStyle=col; ctx.lineWidth=down?2:1.1;
+      ctx.strokeStyle=col; ctx.lineWidth=down?2.4:1.5;
       if(down&&!nd.alt){ctx.setLineDash([4,4]);}else{ctx.setLineDash([]);}
       ctx.stroke(); ctx.setLineDash([]);
       if(down&&!nd.alt){
@@ -670,13 +672,13 @@ function labId(id){ return lab(qById(id), ANS[id]); }
       if(!down){
         var p=((t*0.28+i*0.19)%1);
         var px=nd.x+(hub.x-nd.x)*p, py=nd.y+(hub.y-nd.y)*p - Math.sin(p*Math.PI)*24;
-        ctx.beginPath();ctx.arc(px,py,1.8,0,6.284);ctx.fillStyle='rgba(251,157,70,.5)';ctx.fill();
+        ctx.beginPath();ctx.arc(px,py,2.1,0,6.284);ctx.fillStyle='rgba(251,157,70,.5)';ctx.fill();
       }
     }
     /* nodes: filled dot means an alternative exists, hollow ring means single source */
     for(var i=0;i<nodes.length;i++){
       var nd=nodes[i], down=(i===failIdx&&phase==='down');
-      var r=nd.near?6.5:4.8;
+      var r=nd.near?7:5.4;
       ctx.beginPath();ctx.arc(nd.x,nd.y,r,0,6.284);
       if(nd.alt){
         ctx.fillStyle = down ? '#FB9D46' : (nd.near?'#FB9D46':'rgba(190,220,232,.85)');
@@ -696,13 +698,13 @@ function labId(id){ return lab(qById(id), ANS[id]); }
       }
     }
     /* hub */
-    ctx.beginPath();ctx.arc(hub.x,hub.y,13,0,6.284);
+    ctx.beginPath();ctx.arc(hub.x,hub.y,15,0,6.284);
     ctx.fillStyle='rgba(251,157,70,.16)';ctx.fill();
     ctx.strokeStyle='#FB9D46';ctx.lineWidth=1.6;ctx.stroke();
-    ctx.beginPath();ctx.arc(hub.x,hub.y,4.5,0,6.284);ctx.fillStyle='#FB9D46';ctx.fill();
+    ctx.beginPath();ctx.arc(hub.x,hub.y,5,0,6.284);ctx.fillStyle='#FB9D46';ctx.fill();
     ctx.font='800 10px -apple-system,Segoe UI,Roboto,sans-serif';
     ctx.fillStyle='rgba(255,255,255,.7)';
-    ctx.fillText('YOUR LINE', hub.x-24, hub.y+30);
+    ctx.fillText('YOUR LINE', hub.x-24, hub.y+33);
     requestAnimationFrame(loop);
   }
   window.addEventListener('resize',size);
